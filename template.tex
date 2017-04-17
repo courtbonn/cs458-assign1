@@ -167,7 +167,70 @@ The primary resource for fetching data comes from the Instagram API, which is de
 \includegraphics[width=\linewidth]{erd}
 
 \section{Implementation of ER diagrams}
-The data itself is already implemented in Instagram's API service. What we suggest is to pull from the API dynamically, formatting the data during runtime for the visualization.
+The data itself is already implemented in Instagram's API service. What we suggest is to pull from the API dynamically, formatting the data during runtime for the visualization. However, in the case that we need a database later, we've designed one around the data that will be pulled from Instagram. The following sections show each table's definitions.
+
+\subsection{User Table}
+\begin{verbatim}
+CREATE TABLE `user` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+\end{verbatim}
+
+\subsection{Media Table}
+\begin{verbatim}
+CREATE TABLE `media` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(64) DEFAULT NULL,
+  `filter` varchar(64) DEFAULT NULL,
+  `caption` text,
+  `link` varchar(512) DEFAULT NULL,
+  `user` int(10) unsigned DEFAULT NULL,
+  `created_time` datetime DEFAULT NULL,
+  `location` varchar(512) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `User_Media` (`user`),
+  CONSTRAINT `User_Media` 
+  FOREIGN KEY (`user`)
+  REFERENCES `user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+\end{verbatim}
+
+\subsection{Comment Table}
+\begin{verbatim}
+CREATE TABLE `comment` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `username` varchar(128) DEFAULT NULL,
+  `full_name` varchar(256) DEFAULT NULL,
+  `profile_picture` varchar(512) DEFAULT NULL,
+  `bio` text,
+  `website` varchar(512) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+\end{verbatim}
+
+\subsection{Media Comment Relation Table}
+\begin{verbatim}
+CREATE TABLE `media_comment` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `media` int(11) unsigned DEFAULT NULL,
+  `comment` int(11) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `Media_Comment` (`media`),
+  CONSTRAINT `Media_Comment` 
+  FOREIGN KEY (`media`) 
+  	REFERENCES `media` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+\end{verbatim}
+
+\subsection{Tag Table}
+\begin{verbatim}
+CREATE TABLE `tag` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(256) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+\end{verbatim}
 
 \section{Visualization Interface Design}
 The visualization itself is going to look similar to a force-directed graph with two kinds of nodes. The primary nodes represent a Media object. These are photos or videos, and they will display the photo or a screen shot of the video. Secondary nodes will represent User populations related to primary nodes, displaying the number of users being represented in that node.
